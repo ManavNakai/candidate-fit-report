@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 //import pdfParse from "pdf-parse";
-import Tesseract from "tesseract.js";
+//import Tesseract from "tesseract.js";
 
 export async function POST(request: Request) {
   try {
@@ -25,8 +25,24 @@ export async function POST(request: Request) {
     } else if (file.type.startsWith("image/")) {
       // Parse Image via OCR
       // Tesseract.recognize takes a buffer in Node.js
-      const { data } = await Tesseract.recognize(buffer, "eng");
-      text = data.text;
+      try {
+        const { createWorker } = await import("tesseract.js");
+
+        const worker = await createWorker("eng", 1, {
+          workerPath: "./node_modules/tesseract.js/src/worker-script/node/index.js",
+        });
+
+        const ocr = await worker.recognize(buffer);
+        await worker.terminate();
+
+        text= ocr.data.text || "";
+      } catch (ocrError) {
+        console.error("OCR error:", ocrError);
+        return NextResponse.json(
+          { error: "OCR failed while reading the image." },
+          { status: 500 }
+        );
+      }
     } else {
       return NextResponse.json(
         { error: "Unsupported file type. Please upload a PDF or Image." },
