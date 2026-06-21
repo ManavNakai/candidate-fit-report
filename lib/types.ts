@@ -1,5 +1,5 @@
 // ============================================================
-// Types for the Resume ↔ JD Matcher
+// Types for the Candidate Fit Report
 // ============================================================
 
 /** A single meaningful token extracted from text. */

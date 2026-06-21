@@ -3,9 +3,9 @@ import Script from "next/script";
 import HomeClient from "@/components/HomeClient";
 
 export const metadata: Metadata = {
-  title: "Resume Keyword Matcher | Job Description Percentage Finder",
+  title: "Candidate Fit Report | Resume and Job Description Analysis",
   description:
-    "Paste your resume and a job description to instantly find missing keywords, calculate a weighted match percentage, and review a resume section checklist.",
+    "Resume and Job Description Analysis. Instantly compare your resume with a job description, review your fit score, identify missing keywords, and improve your application — privately and free.",
   alternates: {
     canonical: "/",
   },
@@ -14,9 +14,9 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "@id": "https://resume-jd-matcher.vercel.app/#webapp",
+  "@id": "https://candidate-fit-report.vercel.app/#webapp",
   name: "Job Description Keyword Matcher & Resume Score Tool",
-  url: "https://resume-jd-matcher.vercel.app",
+  url:"https://candidate-fit-report.vercel.app",
   applicationCategory: "BusinessApplication",
   operatingSystem: "All",
   description:
@@ -27,6 +27,7 @@ const jsonLd = {
     "Weighted Resume Match Percentage",
     "Resume Section Completeness Checklist",
     "Role-aware section prioritization",
+    "Candidate Fit Report",
   ],
   offers: {
     "@type": "Offer",

@@ -18,7 +18,7 @@ export default function Header() {
           🎯
         </div>
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
-          Resume ↔ JD Matcher
+          Candidate Fit Report
         </h1>
       </div>
 

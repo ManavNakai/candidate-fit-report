@@ -60,7 +60,7 @@ export default function Footer() {
               </a>
 
               <p className="max-w-sm text-center text-xs leading-relaxed text-slate-500 md:text-right">
-                Resume ↔ JD Matcher built as a free, client-side tool and deployed for
+                Candidate Fit Report built as a free, client-side tool and deployed for
                 practical real-world use.
               </p>
             </div>
@@ -68,7 +68,7 @@ export default function Footer() {
 
           <div className="border-t border-slate-800/80 px-6 py-4 md:px-8">
             <p className="text-center text-xs text-slate-600 md:text-left">
-              © {new Date().getFullYear()} Resume ↔ JD Matcher. 100% free & client-side.
+              © {new Date().getFullYear()} Candidate Fit Report. 100% free & client-side.
             </p>
           </div>
         </div>

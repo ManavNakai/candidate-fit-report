@@ -8,10 +8,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://resume-jd-matcher.vercel.app"),
+  metadataBase: new URL("https://candidate-fit-report.vercel.app"),
   title: {
-    default: "Resume ↔ JD Matcher | Free Resume-to-Job Match Scorer",
-    template: "%s | Resume ↔ JD Matcher",
+    default: "Candidate Fit Report | Resume and Job Description Analysis",
+    template: "%s | Candidate Fit Report",
   },
   description:
     "Instantly see how well your resume matches any job description. Find missing keywords, compare resume content with JD terms, and review a smart resume section checklist — free and private.",
@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     "job description percentage finder",
     "resume optimization tool",
     "resume keyword scanner",
+    "Candidate Fit Report",
   ],
   authors: [{ name: "Manav Nakai" }],
   creator: "Manav Nakai",
@@ -46,11 +47,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Resume ↔ JD Matcher | Free Resume-to-Job Match Scorer",
+    title: "Candidate Fit Report | Resume and Job Description Analysis",
     description:
       "Paste your resume and a job description to instantly find missing keywords, calculate a match score, and review important resume sections.",
     url: "/",
-    siteName: "Resume ↔ JD Matcher",
+    siteName: "Candidate Fit Report",
     type: "website",
     locale: "en_US",
     images: [
@@ -64,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Resume ↔ JD Matcher | Free Resume-to-Job Match Scorer",
+    title: "Candidate Fit Report | Resume and Job Description Analysis",
     description:
-      "Check resume-to-JD match score, missing keywords, and section completeness instantly.",
+      "Check resume-to-JD match score, missing keywords, and section completeness instantly. Generate Candidate Fit Report",
     images: ["/previews/weightage-score-ui.png"],
   },
 };

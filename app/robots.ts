@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://resume-jd-matcher.vercel.app/sitemap.xml",
+    sitemap: "https://candidate-fit-report.vercel.app/sitemap.xml",
   };
 }

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://resume-jd-matcher.vercel.app/sitemap.xml
+Sitemap: https://candidate-fit-report.vercel.app/sitemap.xml

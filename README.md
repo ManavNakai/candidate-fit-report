@@ -1,4 +1,4 @@
-# Resume ↔ JD Matcher 🎯
+# Candidate Fit Report 🎯
 
 A free, fast, fully client-side web app that compares your resume against a job description and gives you an actionable match report. It calculates a weighted match score, highlights missing vs. covered keywords, and checks whether your resume includes the sections the job description cares about (like Education, Projects, or Soft Skills).
 
@@ -8,7 +8,7 @@ A free, fast, fully client-side web app that compares your resume against a job 
 
 ## 🚀 Live Link
 
-**[View the live app on Vercel](https://resume-jd-matcher.vercel.app)**
+**[View the live app on Vercel](https://candidate-fit-report.vercel.app)**
 
 ---
 
@@ -59,12 +59,10 @@ A free, fast, fully client-side web app that compares your resume against a job 
 
 ## 🧑‍💻 Local Development
 
-> **Windows note:** Ensure your parent directory path does **not** contain the `&` character, as this can break Node.js command execution.
-
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ManavNakai/resume-jd-matcher.git
-   cd resume-jd-matcher
+   git clone https://github.com/ManavNakai/candidate-fit-report
+   cd candidate-fit-report
    ```
 2. Install dependencies:
    ```bash
