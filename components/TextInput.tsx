@@ -51,8 +51,9 @@ export default function TextInput({
         
         const data = await res.json();
         onChange(data.text);
-      } catch (err: any) {
-        alert(err.message);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "An unknown error occurred";
+        alert(message);
       } finally {
         setIsExtracting(false);
       }

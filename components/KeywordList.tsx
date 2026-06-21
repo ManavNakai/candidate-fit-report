@@ -20,8 +20,15 @@ const CATEGORY_LABELS: Record<string, string> = {
   soft_skill: "Soft Skill",
   role: "Role",
   education: "Education",
-  certification: "Cert",
+  certification: "Cert.",
   general: "",
+  customer_success: "Customer Success",
+  account_management: "Accounts",
+  sales: "Sales",
+  marketing: "Marketing",
+  operations: "Operations",
+  recruiting: "Recruiting",
+  business_analysis: "Business Analysis",
 };
 
 export default function KeywordList({

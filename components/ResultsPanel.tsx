@@ -47,7 +47,11 @@ export default function ResultsPanel({ result }: ResultsPanelProps) {
       </div>
 
       {/* Section checklist */}
-      <SectionChecklist checks={result.sectionChecklist} />
+      <SectionChecklist
+        checks={result.sectionChecklist}
+        usedRoleFallback={result.usedRoleFallback}
+        roleType={result.detectedRoleType}
+      />
 
       {/* Explanation */}
       <div className="bg-slate-800/40 rounded-2xl border border-slate-700/50 p-6">

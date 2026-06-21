@@ -15,7 +15,7 @@ export function normalize(text: string): string {
     .toLowerCase()
     .replace(/[\r\n\t]+/g, " ")               // newlines → space
     .replace(/[^a-z0-9+#./ -]/g, " ")         // keep +#./ for C++, C#, .NET, CI/CD
-    .replace(/\s+/g, " ")                      // collapse whitespace
+    .replace(/\s+/g, " ")                     // collapse whitespace
     .trim();
 }
 

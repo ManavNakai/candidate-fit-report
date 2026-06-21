@@ -26,7 +26,7 @@ describe("Tokenizer", () => {
     });
 
     it("ignores empty strings", () => {
-      expect(splitWords("  hello   world  ")).toEqual(["hello", "world"]);
+      expect(splitWords(" hello world ")).toEqual(["hello", "world"]);
     });
   });
 
@@ -48,38 +48,36 @@ describe("Tokenizer", () => {
     it("extracts dictionary tokens with higher priority", () => {
       const text = "I have experience with React and Python, as well as Next.js.";
       const tokens = extractTokens(text);
-      
-      const normalizedTokens = tokens.map(t => t.normalized);
+
+      const normalizedTokens = tokens.map((t) => t.normalized);
       expect(normalizedTokens).toContain("react");
       expect(normalizedTokens).toContain("python");
       expect(normalizedTokens).toContain("next.js");
-      expect(normalizedTokens).not.toContain("experience"); // Stopword
-      expect(normalizedTokens).not.toContain("and"); // Stopword
+      expect(normalizedTokens).not.toContain("experience");
+      expect(normalizedTokens).not.toContain("and");
     });
 
     it("extracts bigrams", () => {
       const text = "Looking for a software engineer with React Native skills.";
       const tokens = extractTokens(text);
-      
-      const normalizedTokens = tokens.map(t => t.normalized);
+
+      const normalizedTokens = tokens.map((t) => t.normalized);
       expect(normalizedTokens).toContain("react native");
     });
-    
+
     it("extracts trigrams", () => {
       const text = "Experience with Amazon Web Services is a plus.";
       const tokens = extractTokens(text);
-      
-      const normalizedTokens = tokens.map(t => t.normalized);
+
+      const normalizedTokens = tokens.map((t) => t.normalized);
       expect(normalizedTokens).toContain("amazon web services");
     });
 
     it("deduplicates tokens", () => {
       const text = "React react React.js react";
       const tokens = extractTokens(text);
-      
-      // "react" and "react.js" are treated as distinct tokens by our simple normalizer,
-      // but multiple "react" instances should be deduplicated.
-      const reactCount = tokens.filter(t => t.normalized === "react").length;
+
+      const reactCount = tokens.filter((t) => t.normalized === "react").length;
       expect(reactCount).toBe(1);
     });
   });

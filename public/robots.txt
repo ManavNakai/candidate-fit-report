@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://resume-jd-matcher.vercel.app/sitemap.xml

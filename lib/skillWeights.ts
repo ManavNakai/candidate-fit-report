@@ -259,4 +259,73 @@ export const SKILL_WEIGHTS: Record<string, SkillEntry> = {
   "scrum master": { category: "certification", weight: 1.5 },
   cissp:         { category: "certification", weight: 1.5 },
   comptia:       { category: "certification", weight: 1.5 },
+
+  // ── Non-Tech / Business Keywords ───────────────────────────
+
+  // Shared high-value non-tech terms
+  "stakeholder management": { category: "general", weight: 2.0 },
+  "cross-functional": { category: "general", weight: 1.5 },
+  reporting: { category: "operations", weight: 1.5 },
+  "kpi tracking": { category: "operations", weight: 1.5 },
+  forecasting: { category: "business_analysis", weight: 1.5 },
+  "process improvement": { category: "operations", weight: 1.5 },
+  "process optimization": { category: "operations", weight: 1.5 },
+
+  // Customer success / account management
+  "customer success": { category: "customer_success", weight: 2.5 },
+  "account management": { category: "account_management", weight: 2.5 },
+  "account health": { category: "account_management", weight: 2.0 },
+  "business reviews": { category: "customer_success", weight: 2.0 },
+  crm: { category: "tool", weight: 2.0 },
+
+  // Sales / account / business development
+  sales: { category: "sales", weight: 2.0 },
+  "business development": { category: "sales", weight: 2.5 },
+  "lead generation": { category: "sales", weight: 2.0 },
+  negotiation: { category: "soft_skill", weight: 1.5 },
+  "pipeline management": { category: "sales", weight: 2.0 },
+  "revenue growth": { category: "sales", weight: 2.0 },
+  "b2b sales": { category: "sales", weight: 2.0 },
+
+  // Marketing
+  marketing: { category: "marketing", weight: 2.0 },
+  "marketing strategy": { category: "marketing", weight: 2.5 },
+  "campaign management": { category: "marketing", weight: 2.5 },
+  "digital marketing": { category: "marketing", weight: 2.5 },
+  "content marketing": { category: "marketing", weight: 2.5 },
+  "email marketing": { category: "marketing", weight: 2.0 },
+  "social media marketing": { category: "marketing", weight: 2.0 },
+  "market research": { category: "marketing", weight: 2.0 },
+  "competitive analysis": { category: "marketing", weight: 2.0 },
+  "go-to-market": { category: "marketing", weight: 2.0 },
+  "product marketing": { category: "marketing", weight: 2.5 },
+  "google analytics": { category: "tool", weight: 2.0 },
+
+  // Operations / project / program
+  "program management": { category: "operations", weight: 2.5 },
+  "project management": { category: "operations", weight: 2.5 },
+  "risk management": { category: "operations", weight: 2.0 },
+  "resource allocation": { category: "operations", weight: 2.0 },
+  "operational efficiency": { category: "operations", weight: 2.0 },
+  "vendor management": { category: "operations", weight: 2.0 },
+  compliance: { category: "operations", weight: 1.5 },
+  logistics: { category: "operations", weight: 1.5 },
+
+  // Recruiting / HR
+  "talent acquisition": { category: "recruiting", weight: 2.5 },
+  sourcing: { category: "recruiting", weight: 2.0 },
+  screening: { category: "recruiting", weight: 2.0 },
+  interviewing: { category: "recruiting", weight: 2.0 },
+  "candidate experience": { category: "recruiting", weight: 2.0 },
+  "offer negotiation": { category: "recruiting", weight: 2.0 },
+
+  // Business analyst / strategy / product-adjacent
+  "business analysis": { category: "business_analysis", weight: 2.5 },
+  "requirements gathering": { category: "business_analysis", weight: 2.5 },
+  "stakeholder analysis": { category: "business_analysis", weight: 2.0 },
+  dashboards: { category: "tool", weight: 1.5 },
+  "strategic planning": { category: "business_analysis", weight: 2.0 },
+  "decision support": { category: "business_analysis", weight: 2.0 },
+  "root cause analysis": { category: "business_analysis", weight: 2.0 },
+  "customer feedback": { category: "customer_success", weight: 2.0 },
 };

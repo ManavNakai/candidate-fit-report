@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-//import pdfParse from "pdf-parse";
-//import Tesseract from "tesseract.js";
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +22,6 @@ export async function POST(request: Request) {
       text = pdfData.text;
     } else if (file.type.startsWith("image/")) {
       // Parse Image via OCR
-      // Tesseract.recognize takes a buffer in Node.js
       try {
         const { createWorker } = await import("tesseract.js");
 

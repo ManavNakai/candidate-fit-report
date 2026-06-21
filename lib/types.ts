@@ -25,7 +25,14 @@ export type TokenCategory =
   | "role"
   | "education"
   | "certification"
-  | "general";
+  | "general"
+  | "customer_success"
+  | "account_management"
+  | "sales"
+  | "marketing"
+  | "operations"
+  | "recruiting"
+  | "business_analysis";
 
 /** A resume-section check (e.g. "Does the resume cover Education?"). */
 export interface SectionCheck {
@@ -53,6 +60,10 @@ export interface MatchResult {
   explanation: string;
   /** Raw stats for the explanation panel. */
   stats: MatchStats;
+  /** Whether role fallback was used. */
+  usedRoleFallback: boolean;
+  /** Detected role type. */
+  detectedRoleType: "tech" | "non-tech";
 }
 
 export interface MatchStats {

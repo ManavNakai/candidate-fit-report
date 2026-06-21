@@ -1,66 +1,99 @@
 # Resume ↔ JD Matcher 🎯
 
-A free, fast, and entirely client-side web application that compares your resume to a job description. It calculates a weighted match score, identifies missing and covered keywords, and checks if your resume contains the sections that the job description emphasizes.
+A free, fast, fully client-side web app that compares your resume against a job description and gives you an actionable match report. It calculates a weighted match score, highlights missing vs. covered keywords, and checks whether your resume includes the sections the job description cares about (like Education, Projects, or Soft Skills).
 
-**[View the Live Demo on Vercel]** *(Replace this with your Vercel URL after deploying)*
-
-Built as a trial task for Digital Heroes / Digital Marketing Heroes.
+> Perfect for students, job seekers, and developers who want to quickly tailor their resume before hitting “Apply”.
 
 ---
 
-## Features
+## 🚀 Live Link
 
-- **Instant & Private Analysis**: Runs 100% in your browser. No data is sent to external servers or paid APIs.
-- **Weighted Scoring Algorithm**: Emphasizes hard skills, programming languages, and tools over generic filler words. Built-in dictionary of ~200+ tech terms.
-- **Visual Keyword Breakdown**: Easily see which keywords you have covered (✅) and which ones you are missing (❌).
-- **Section Checklist**: Detects if the job description asks for Education, Projects, or Soft Skills, and checks if your resume includes them.
-- **Zero Cost**: Built completely with free-tier tools.
-
-## Tech Stack
-
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Testing**: [Vitest](https://vitest.dev/)
-- **Hosting**: [Vercel](https://vercel.com/)
+**[View the live app on Vercel](https://resume-jd-matcher.vercel.app)**
 
 ---
 
-## How It Works
+## ✨ Features
 
-1. **Tokenization**: We extract keywords from both your Resume and the Job Description. Text is normalized, stopwords are removed, and multi-word phrases (n-grams) are extracted.
-2. **Matching**: We compare your resume's tokens against the JD's tokens.
-3. **Weighting**: Tokens are weighted based on importance (e.g., "React" has a higher weight than general soft skills).
-4. **Scoring**: A final score from 0-100 is generated along with a plain English explanation of the results.
+- **Instant & Private Analysis**  
+  Runs 100% in your browser. Your resume and JD never leave your machine — no servers, no paid APIs.
+
+- **Weighted Scoring Algorithm**  
+  Emphasizes hard skills, programming languages, and tools over generic filler words, using a built-in dictionary of ~200+ tech terms.
+
+- **Visual Keyword Breakdown**  
+  See at a glance which keywords you already cover (✅) and which important ones are missing (❌).
+
+- **Section Awareness Checklist**  
+  Detects whether the job description emphasizes sections like Education, Projects, or Soft Skills and checks if your resume mentions them.
+
+- **Zero Cost, Zero Setup**  
+  Built entirely with free-tier tools and runs in any modern browser.
 
 ---
 
-## Local Development
+## 🧱 Tech Stack
 
-> **Note for Windows Users**: Ensure your parent directory name does not contain the `&` character, as this breaks Node.js command execution.
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **Testing:** [Vitest](https://vitest.dev/)
+- **Hosting:** [Vercel](https://vercel.com/)
 
-1. Clone the repository.
+---
+
+## ⚙️ How It Works
+
+1. **Tokenization**  
+   Text from both the resume and job description is normalized, split into tokens, and cleaned (lowercased, stopwords removed, plus extraction of multi-word phrases).
+
+2. **Matching**  
+   The tool compares tokens from your resume against those from the job description to find overlaps and gaps.
+
+3. **Weighting**  
+   Tokens are weighted by importance — for example, concrete skills like `React`, `TypeScript`, or `PostgreSQL` count more than generic soft-skill words.
+
+4. **Scoring & Explanation**  
+   A final score from 0–100 is generated, alongside a human-readable explanation, covered/missing keyword lists, and a section checklist.
+
+---
+
+## 🧑‍💻 Local Development
+
+> **Windows note:** Ensure your parent directory path does **not** contain the `&` character, as this can break Node.js command execution.
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ManavNakai/resume-jd-matcher.git
+   cd resume-jd-matcher
+   ```
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Run the development server:
+3. Start the development server:
    ```bash
    npm run dev
    ```
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Running Tests
+---
 
-We use Vitest for zero-config, fast unit testing.
+## ✅ Running Tests
+
+This project uses Vitest for fast, zero-config unit tests.
+
 ```bash
 npm run test
 ```
 
 ---
 
-## Author
+## 👤 Author
 
 **Manav Nakai**
-- Email: YOUR_EMAIL_HERE
-- [Digital Heroes](https://digitalheroesco.com)
+
+- Email: [manavnakai123@gmail.com](mailto:manavnakai123@gmail.com)
+- LinkedIn: [Manav Nakai](https://www.linkedin.com/in/manav-nakai-833482247/)
+- Built as a trial project for: [Digital Heroes](https://digitalheroesco.com)
+
+If you find this useful, feel free to ⭐ the repo or open an issue with ideas for improving the matching logic.
