@@ -28,6 +28,9 @@ const jsonLd = {
     "Resume Section Completeness Checklist",
     "Role-aware section prioritization",
     "Candidate Fit Report",
+    "Resume and Job Description Keyword Matcher",
+    "Resume and Job Description Analyzer",
+    "Resume and Job Description Comparer",
   ],
   offers: {
     "@type": "Offer",

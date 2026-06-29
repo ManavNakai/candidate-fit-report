@@ -2,20 +2,25 @@
 // Matcher — core scoring engine
 // ============================================================
 
-import type { MatchResult, MatchStats, SectionCheck, Token } from "./types";
+import type {
+  MatchResult,
+  MatchStats,
+  SectionCheck,
+  Token,
+  CanonicalSection,
+} from "./types";
 import { extractTokens, tokenLookupSet } from "./tokenizer";
 
 // ── Section detection patterns ───────────────────────────────
 
-interface SectionPattern {
-  section: string;
-  jdPatterns: RegExp[];
-  resumePatterns: RegExp[];
-}
-
 type RoleType = "tech" | "non-tech";
 
-const TECH_CHECKLIST = [
+interface SectionPattern {
+  section: CanonicalSection;
+  jdPatterns: RegExp[];
+}
+
+const TECH_CHECKLIST: CanonicalSection[] = [
   "Summary",
   "Skills",
   "Experience",
@@ -24,52 +29,87 @@ const TECH_CHECKLIST = [
   "Certifications",
   "Achievements",
   "Leadership",
-  "Volunteer Experience",
-] as const;
+  "Volunteer",
+];
 
-const FALLBACK_PRIORITY_TECH: Record<string, SectionCheck["relevance"]> = {
+const NON_TECH_CHECKLIST: CanonicalSection[] = [
+  "Summary",
+  "Skills",
+  "Experience",
+  "Education",
+  "Projects",
+  "Certifications",
+  "Achievements",
+  "Leadership",
+  "Volunteer",
+];
+
+const FALLBACK_PRIORITY_TECH: Record<
+  CanonicalSection,
+  SectionCheck["relevance"]
+> = {
   Summary: "high",
   Skills: "high",
   Experience: "high",
   Education: "medium",
-  Projects: "high",          // tech: projects are strong proof of skill
-  Certifications: "medium",    // tech: certs matter more than in non-tech
+  Projects: "high",
+  Certifications: "medium",
   Achievements: "medium",
   Leadership: "medium",
-  "Volunteer Experience": "low",
+  Volunteer: "low",
 };
 
-const NON_TECH_CHECKLIST = [
-  "Summary",
-  "Core Skills",
-  "Experience",
-  "Education",
-  "Certifications",
-  "Achievements",
-  "Leadership",
-  "Volunteer Experience",
-  "Projects / Portfolio",
-] as const;
-
-const FALLBACK_PRIORITY_NON_TECH: Record<string, SectionCheck["relevance"]> = {
+const FALLBACK_PRIORITY_NON_TECH: Record<
+  CanonicalSection,
+  SectionCheck["relevance"]
+> = {
   Summary: "high",
-  "Core Skills": "high",      // soft skills / core competencies
+  Skills: "high",
   Experience: "high",
   Education: "medium",
+  Projects: "low",
   Certifications: "low",
   Achievements: "medium",
-  Leadership: "high",       // non-tech: leadership/soft skills matter more
-  "Volunteer Experience": "medium",
-  "Projects / Portfolio": "low", // non-tech: portfolio is nice-to-have
+  Leadership: "high",
+  Volunteer: "medium",
 };
 
 function getFallbackRelevance(
   roleType: RoleType,
-  section: string
+  section: CanonicalSection,
 ): SectionCheck["relevance"] {
   const map =
     roleType === "tech" ? FALLBACK_PRIORITY_TECH : FALLBACK_PRIORITY_NON_TECH;
   return map[section] ?? "low";
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeHeadingText(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s&/:-]/g, "")
+    .trim();
+}
+
+function hasSectionHeading(text: string, variants: string[]) {
+  const normalizedText = text
+    .split(/\r?\n/)
+    .map((line) => normalizeHeadingText(line))
+    .join("\n");
+
+  return variants.some((variant) => {
+    const v = normalizeHeadingText(variant);
+
+    const patterns = [
+      new RegExp(`(^|\\n)\\s*${escapeRegExp(v)}\\s*($|\\n)`, "i"),
+      new RegExp(`(^|\\n)\\s*${escapeRegExp(v)}\\s*[:|-]`, "i"),
+    ];
+
+    return patterns.some((pattern) => pattern.test(normalizedText));
+  });
 }
 
 const SECTION_PATTERNS: SectionPattern[] = [
@@ -77,14 +117,6 @@ const SECTION_PATTERNS: SectionPattern[] = [
     section: "Summary",
     jdPatterns: [
       /^\s*(summary|profile|professional summary|career objective)\s*:?$/im,
-    ],
-    resumePatterns: [
-      /\bsummary\b/i,
-      /\bprofessional\s+summary\b/i,
-      /\bprofile\b/i,
-      /\bcareer\s+objective\b/i,
-      /\bobjective\b/i,
-      /\boverview\b/i,
     ],
   },
   {
@@ -99,32 +131,10 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\btools?\b/i,
       /\blanguages?\b/i,
       /\bskills?\b/i,
-    ],
-    resumePatterns: [
-      /\btechnical\s+skills?\b/i,
-      /\bskills?\b/i,
-      /\btechnologies?\b/i,
-      /\btech\s+stack\b/i,
-      /\bprogramming\b/i,
-      /\bproficienc/i,
-      /\btools?\b/i,
-      /\blanguages?\b/i,
-    ],
-  },
-  {
-    section: "Core Skills",
-    jdPatterns: [
       /\bcore\s+skills?\b/i,
       /\bkey\s+skills?\b/i,
       /\bcompetencies\b/i,
       /\bfunctional\s+skills?\b/i,
-      /\bskills?\b/i,
-    ],
-    resumePatterns: [
-      /\bcore\s+skills?\b/i,
-      /\bkey\s+skills?\b/i,
-      /\bcompetencies\b/i,
-      /\bskills?\b/i,
     ],
   },
   {
@@ -136,26 +146,10 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bprofessional\s+experience\b/i,
       /\bemployment\b/i,
     ],
-    resumePatterns: [
-      /\bexperience\b/i,
-      /\bwork\s+experience\b/i,
-      /\bprofessional\s+experience\b/i,
-      /\bemployment\b/i,
-      /\bwork\s+history\b/i,
-    ],
   },
   {
     section: "Education",
     jdPatterns: [
-      /\beducation\b/i,
-      /\bdegree\b/i,
-      /\bbachelor/i,
-      /\bmaster/i,
-      /\bphd\b/i,
-      /\buniversity\b/i,
-      /\bcollege\b/i,
-    ],
-    resumePatterns: [
       /\beducation\b/i,
       /\bdegree\b/i,
       /\bbachelor/i,
@@ -172,52 +166,16 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bportfolio\b/i,
       /\bgithub\b/i,
       /\bcase\s+stud/i,
-    ],
-    resumePatterns: [
-      /\bprojects?\b/i,
-      /\bportfolio\b/i,
-      /\bgithub\b/i,
-      /\bcase\s+stud/i,
-    ],
-  },
-  {
-    section: "Projects / Portfolio",
-    jdPatterns: [
-      /\bprojects?\b/i,
-      /\bportfolio\b/i,
       /\bwork\s+samples?\b/i,
-      /\bcase\s+stud/i,
-    ],
-    resumePatterns: [
-      /\bprojects?\b/i,
-      /\bportfolio\b/i,
-      /\bwork\s+samples?\b/i,
-      /\bcase\s+stud/i,
     ],
   },
   {
     section: "Certifications",
-    jdPatterns: [
-      /\bcertificat/i,
-      /\baccreditat/i,
-      /\blicens/i,
-    ],
-    resumePatterns: [
-      /\bcertificat/i,
-      /\baccreditat/i,
-      /\blicens/i,
-    ],
+    jdPatterns: [/\bcertificat/i, /\baccreditat/i, /\blicens/i],
   },
   {
     section: "Achievements",
     jdPatterns: [
-      /\bachievement/i,
-      /\baward/i,
-      /\bhonou?r/i,
-      /\brecognition\b/i,
-      /\baccomplishment/i,
-    ],
-    resumePatterns: [
       /\bachievement/i,
       /\baward/i,
       /\bhonou?r/i,
@@ -235,58 +193,141 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bmentorship\b/i,
       /\bpositions?\s+of\s+responsibility\b/i,
     ],
-    resumePatterns: [
-      /\bleadership\b/i,
-      /\bteam\s+lead\b/i,
-      /\bled\b/i,
-      /\bowner(ship)?\b/i,
-      /\bmentorship\b/i,
-      /\bpositions?\s+of\s+responsibility\b/i,
-      /\bextracurricular/i,
-    ],
   },
   {
-    section: "Volunteer Experience",
+    section: "Volunteer",
     jdPatterns: [
       /\bvolunteer/i,
       /\bcommunity\b/i,
       /\bsocial\s+impact\b/i,
       /\bngo\b/i,
     ],
-    resumePatterns: [
-      /\bvolunteer/i,
-      /\bcommunity\b/i,
-      /\bsocial\s+impact\b/i,
-      /\bngo\b/i,
-    ],
   },
 ];
 
+const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
+  Summary: [
+    "summary",
+    "profile summary",
+    "professional summary",
+    "career summary",
+    "career objective",
+    "objective",
+    "profile",
+    "about me",
+    "overview",
+  ],
+  Skills: [
+    "skills",
+    "technical skills",
+    "core skills",
+    "key skills",
+    "skills summary",
+    "competencies",
+    "technical competencies",
+    "tech stack",
+    "tools and workflow",
+    "programming languages",
+  ],
+  Experience: [
+    "experience",
+    "work experience",
+    "professional experience",
+    "employment history",
+    "internship",
+    "internships",
+    "relevant experience",
+  ],
+  Projects: [
+    "projects",
+    "project experience",
+    "personal projects",
+    "academic projects",
+    "relevant projects",
+    "portfolio",
+    "projects / portfolio",
+    "work samples",
+  ],
+  Leadership: [
+    "leadership",
+    "leadership experience",
+    "positions of responsibility",
+    "position of responsibility",
+    "responsibility",
+    "responsibilities",
+    "extracurricular leadership",
+    "campus leadership",
+  ],
+  Education: ["education", "academic background", "qualifications"],
+  Certifications: [
+    "certifications",
+    "certification",
+    "certificates",
+    "courses",
+    "licenses",
+    "accreditations",
+  ],
+  Achievements: [
+    "achievements",
+    "achievement",
+    "awards",
+    "honors",
+    "honours",
+    "accomplishments",
+    "recognition",
+  ],
+  Volunteer: [
+    "volunteer",
+    "volunteering",
+    "volunteer experience",
+    "community involvement",
+    "community work",
+    "social impact",
+  ],
+};
+
 const EXPLICIT_RESUME_SECTION_HEADING_PATTERNS: RegExp[] = [
+  /^\s*(summary|profile|professional summary|career objective)\s*:?$/im,
   /^\s*(education|academic background)\s*:?$/im,
   /^\s*(experience|work experience|professional experience)\s*:?$/im,
-  /^\s*(skills|technical skills|required skills|core skills)\s*:?$/im,
+  /^\s*(skills|technical skills|required skills|core skills|key skills|competencies)\s*:?$/im,
   /^\s*(certifications|licenses|accreditations)\s*:?$/im,
-  /^\s*(projects|project experience|portfolio)\s*:?$/im,
+  /^\s*(projects|project experience|portfolio|work samples)\s*:?$/im,
+  /^\s*(leadership|leadership experience|positions? of responsibility)\s*:?$/im,
+  /^\s*(achievements|awards|honours?|recognition)\s*:?$/im,
+  /^\s*(volunteer|volunteer experience|community involvement)\s*:?$/im,
 ];
 
-function hasExplicitResumeSectionPreferences(jdText: string): boolean {
-  const headingMatches = EXPLICIT_RESUME_SECTION_HEADING_PATTERNS.filter((pattern) =>
-    pattern.test(jdText)
+function hasExplicitJdSectionSignals(jdText: string): boolean {
+  const headingMatches = EXPLICIT_RESUME_SECTION_HEADING_PATTERNS.filter(
+    (pattern) => pattern.test(jdText),
   ).length;
 
   return headingMatches >= 2;
 }
 
-const EXPLICIT_JD_TO_CHECKLIST_MAP: Record<string, RegExp[]> = {
-  Summary: [/^\s*(summary|profile|professional summary|career objective)\s*:?$/im],
-  Skills: [/^\s*(skills|technical skills|required skills|core skills)\s*:?$/im],
-  "Core Skills": [/^\s*(core skills|key skills|competencies|functional skills)\s*:?$/im],
-  Experience: [/^\s*(experience|work experience|professional experience)\s*:?$/im],
+const EXPLICIT_JD_TO_CHECKLIST_MAP: Record<CanonicalSection, RegExp[]> = {
+  Summary: [
+    /^\s*(summary|profile|professional summary|career objective)\s*:?$/im,
+  ],
+  Skills: [
+    /^\s*(skills|technical skills|required skills|core skills|key skills|competencies)\s*:?$/im,
+  ],
+  Experience: [
+    /^\s*(experience|work experience|professional experience)\s*:?$/im,
+  ],
+  Projects: [
+    /^\s*(projects|project experience|portfolio|work samples)\s*:?$/im,
+  ],
+  Leadership: [
+    /^\s*(leadership|leadership experience|positions? of responsibility)\s*:?$/im,
+  ],
   Education: [/^\s*(education|academic background)\s*:?$/im],
-  Projects: [/^\s*(projects|project experience|portfolio)\s*:?$/im, /^\s*(nice to have)\s*:?$/im],
-  "Projects / Portfolio": [/^\s*(projects|project experience|portfolio|work samples)\s*:?$/im],
   Certifications: [/^\s*(certifications|licenses|accreditations)\s*:?$/im],
+  Achievements: [/^\s*(achievements|awards|honours?|recognition)\s*:?$/im],
+  Volunteer: [
+    /^\s*(volunteer|volunteer experience|community involvement)\s*:?$/im,
+  ],
 };
 
 function inferRoleType(jdText: string, resumeText: string): RoleType {
@@ -341,24 +382,31 @@ function inferRoleType(jdText: string, resumeText: string): RoleType {
   return techScore >= nonTechScore ? "tech" : "non-tech";
 }
 
-function getChecklistForRole(roleType: RoleType): readonly string[] {
+function getChecklistForRole(roleType: RoleType): readonly CanonicalSection[] {
   return roleType === "tech" ? TECH_CHECKLIST : NON_TECH_CHECKLIST;
 }
 
-function getSectionPattern(section: string): SectionPattern | undefined {
+function getSectionPattern(
+  section: CanonicalSection,
+): SectionPattern | undefined {
   return SECTION_PATTERNS.find((sp) => sp.section === section);
 }
 
-function getExplicitChecklistFromJd(jdText: string, roleType: RoleType): string[] {
-  const baseSections =
-    roleType === "tech"
-      ? ["Skills", "Experience", "Education", "Projects", "Certifications", "Summary"]
-      : ["Core Skills", "Experience", "Education", "Projects / Portfolio", "Certifications", "Summary"];
+function getExplicitChecklistFromJd(jdText: string): CanonicalSection[] {
+  const baseSections: CanonicalSection[] = [
+    "Skills",
+    "Experience",
+    "Education",
+    "Projects",
+    "Certifications",
+    "Summary",
+    "Leadership",
+    "Achievements",
+    "Volunteer",
+  ];
 
   return baseSections.filter((section) => {
     const patterns = EXPLICIT_JD_TO_CHECKLIST_MAP[section];
-    if (!patterns) return false;
-
     return patterns.some((pattern) => pattern.test(jdText));
   });
 }
@@ -369,7 +417,7 @@ function getExplicitChecklistFromJd(jdText: string, roleType: RoleType): string[
  */
 function detectSections(
   resumeText: string,
-  jdText: string
+  jdText: string,
 ): {
   checks: SectionCheck[];
   usedRoleFallback: boolean;
@@ -378,11 +426,11 @@ function detectSections(
   const roleType = inferRoleType(jdText, resumeText);
   const fallbackChecklist = getChecklistForRole(roleType);
 
-  const jdHasExplicitSectionSignals = hasExplicitResumeSectionPreferences(jdText);
+  const jdHasExplicitSectionSignals = hasExplicitJdSectionSignals(jdText);
 
   const checklist = jdHasExplicitSectionSignals
-  ? getExplicitChecklistFromJd(jdText, roleType)
-  : fallbackChecklist;
+    ? getExplicitChecklistFromJd(jdText)
+    : fallbackChecklist;
 
   const checks: SectionCheck[] = checklist.map((section) => {
     const pattern = getSectionPattern(section);
@@ -395,8 +443,13 @@ function detectSections(
       };
     }
 
-    const jdMatchCount = pattern.jdPatterns.filter((p) => p.test(jdText)).length;
-    const resumeHas = pattern.resumePatterns.some((p) => p.test(resumeText));
+    const jdMatchCount = pattern.jdPatterns.filter((p) =>
+      p.test(jdText),
+    ).length;
+    const resumeHas = hasSectionHeading(
+      resumeText,
+      SECTION_SYNONYMS[section] ?? [section],
+    );
 
     let relevance: SectionCheck["relevance"] = "low";
 
@@ -442,9 +495,10 @@ function getScoreLabel(score: number): MatchResult["label"] {
  * Build a human-readable explanation of how the score was computed.
  */
 function buildExplanation(stats: MatchStats, label: string): string {
-  const pct = stats.totalJdTokens > 0
-    ? Math.round((stats.matchedCount / stats.totalJdTokens) * 100)
-    : 0;
+  const pct =
+    stats.totalJdTokens > 0
+      ? Math.round((stats.matchedCount / stats.totalJdTokens) * 100)
+      : 0;
 
   const parts: string[] = [
     `We extracted ${stats.totalJdTokens} meaningful keyword${stats.totalJdTokens !== 1 ? "s" : ""} from the job description.`,
@@ -491,11 +545,15 @@ export function analyzeMatch(resumeText: string, jdText: string): MatchResult {
 
   // 4. Compute weighted score
   const maxWeightedScore = jdTokens.reduce((sum, t) => sum + t.weight, 0);
-  const totalWeightedScore = coveredTokens.reduce((sum, t) => sum + t.weight, 0);
+  const totalWeightedScore = coveredTokens.reduce(
+    (sum, t) => sum + t.weight,
+    0,
+  );
 
-  const score = maxWeightedScore > 0
-    ? Math.round((totalWeightedScore / maxWeightedScore) * 100)
-    : 0;
+  const score =
+    maxWeightedScore > 0
+      ? Math.round((totalWeightedScore / maxWeightedScore) * 100)
+      : 0;
 
   // 5. Section checklist
   const {

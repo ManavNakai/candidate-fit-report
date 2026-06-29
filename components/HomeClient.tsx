@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { analyzeMatch } from "@/lib/matcher";
 import type { MatchResult } from "@/lib/types";
 
-export default function Home() {
+export default function HomeClient() {
   const [resumeText, setResumeText] = useState("");
   const [jdText, setJdText] = useState("");
   const [result, setResult] = useState<MatchResult | null>(null);
@@ -34,7 +34,7 @@ export default function Home() {
         setError(
           err instanceof Error
             ? err.message
-            : "Something went wrong. Please check your inputs and try again."
+            : "Something went wrong. Please check your inputs and try again.",
         );
       } finally {
         setLoading(false);
@@ -58,6 +58,7 @@ export default function Home() {
             setResult(null);
           }}
           icon="📄"
+          fileInputTestId="resume-file-input"
         />
         <TextInput
           id="jd-input"
@@ -69,6 +70,7 @@ export default function Home() {
             setResult(null);
           }}
           icon="📋"
+          fileInputTestId="jd-file-input"
         />
       </section>
 
@@ -89,11 +91,14 @@ export default function Home() {
       )}
 
       {/* Analyze Button */}
-      <AnalyzeButton
-        onClick={handleAnalyze}
-        disabled={!canAnalyze}
-        loading={loading}
-      />
+
+      <div className="flex justify-center">
+        <AnalyzeButton
+          onClick={handleAnalyze}
+          disabled={!canAnalyze}
+          loading={loading}
+        />
+      </div>
 
       {/* Results */}
       {result && <ResultsPanel result={result} />}

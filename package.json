@@ -1,6 +1,6 @@
 {
   "name": "Candidate Fit Report",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
@@ -10,6 +10,9 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@playwright/test": "^1.61.1",
+    "@testing-library/react": "^16.3.2",
+    "@vercel/analytics": "^2.0.1",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "pdf-parse": "^1.1.1",
@@ -20,12 +23,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
     "@types/node": "^20",
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.9"

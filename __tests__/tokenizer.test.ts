@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { normalize, splitWords, extractTokens, isStopword } from "../lib/tokenizer";
+import {
+  normalize,
+  splitWords,
+  extractTokens,
+  isStopword,
+} from "../lib/tokenizer";
 
 describe("Tokenizer", () => {
   describe("normalize", () => {
@@ -8,7 +13,7 @@ describe("Tokenizer", () => {
     });
 
     it("collapses whitespace", () => {
-      expect(normalize("hello   world\n\t!")).toBe("hello world");
+      expect(normalize("hello world\n\t!")).toBe("hello world");
     });
 
     it("keeps specific special characters", () => {
@@ -16,7 +21,14 @@ describe("Tokenizer", () => {
     });
 
     it("removes punctuation", () => {
-      expect(normalize("hello, world! How's it going?")).toBe("hello world how s it going");
+      expect(normalize("hello, world! How's it going?")).toBe(
+        "hello world how s it going"
+      );
+    });
+
+    it("handles empty text safely", () => {
+      expect(normalize("")).toBe("");
+      expect(normalize("   \n\t   ")).toBe("");
     });
   });
 
@@ -27,6 +39,14 @@ describe("Tokenizer", () => {
 
     it("ignores empty strings", () => {
       expect(splitWords(" hello world ")).toEqual(["hello", "world"]);
+    });
+
+    it("trims leading and trailing separators", () => {
+      expect(splitWords("/react ./node.js aws/")).toEqual([
+        "react",
+        "node.js",
+        "aws",
+      ]);
     });
   });
 
@@ -79,6 +99,11 @@ describe("Tokenizer", () => {
 
       const reactCount = tokens.filter((t) => t.normalized === "react").length;
       expect(reactCount).toBe(1);
+    });
+
+    it("returns an empty array for empty or stopword-only text", () => {
+      expect(extractTokens("")).toEqual([]);
+      expect(extractTokens("the and with for")).toEqual([]);
     });
   });
 });

@@ -1,4 +1,10 @@
+// app/api/extract/route.ts
 import { NextResponse } from "next/server";
+
+const MAX_PDF_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+// Ensure Node.js runtime (needed for pdf-parse / Buffer)
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
@@ -7,50 +13,68 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { error: "No file provided" },
+        { error: "No file provided. Please choose a file to upload." },
         { status: 400 }
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    let text = "";
-    
-    if (file.type === "application/pdf") {
-      // Parse PDF
-      const pdfParse = (await import("pdf-parse")).default;
-      const pdfData = await pdfParse(buffer);
-      text = pdfData.text;
-    } else if (file.type.startsWith("image/")) {
-      // Parse Image via OCR
-      try {
-        const { createWorker } = await import("tesseract.js");
-
-        const worker = await createWorker("eng", 1, {
-          workerPath: "./node_modules/tesseract.js/src/worker-script/node/index.js",
-        });
-
-        const ocr = await worker.recognize(buffer);
-        await worker.terminate();
-
-        text= ocr.data.text || "";
-      } catch (ocrError) {
-        console.error("OCR error:", ocrError);
+    // Only handle PDFs on the server.
+    // Images are handled via client-side OCR (Tesseract) in the browser.
+    if (file.type !== "application/pdf") {
+      if (file.type.startsWith("image/")) {
         return NextResponse.json(
-          { error: "OCR failed while reading the image." },
-          { status: 500 }
+          {
+            error:
+              "Image files are processed in your browser. If extraction fails, try a smaller/clearer image or paste the text manually.",
+          },
+          { status: 400 }
         );
       }
-    } else {
+
       return NextResponse.json(
-        { error: "Unsupported file type. Please upload a PDF or Image." },
+        {
+          error:
+            "Unsupported file type. Please upload a PDF, image, or plain text file.",
+        },
         { status: 400 }
+      );
+    }
+
+    // Size limit for PDFs to keep the function fast and avoid timeouts
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      return NextResponse.json(
+        {
+          error:
+            "This PDF is too large. Please upload a smaller PDF (under 5 MB) or paste the text manually.",
+        },
+        { status: 413 } // Payload Too Large
+      );
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const pdfParse = (await import("pdf-parse")).default;
+    const pdfData = await pdfParse(buffer);
+    const text = (pdfData.text || "").trim();
+
+    if (!text) {
+      return NextResponse.json(
+        {
+          error:
+            "Could not find readable text in this PDF. If it's a scanned document, try uploading it as an image (for browser OCR) or paste the text manually.",
+        },
+        { status: 422 } // Unprocessable Entity
       );
     }
 
     return NextResponse.json({ text });
   } catch (error: unknown) {
     console.error("Extraction error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to extract text from file";
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Failed to extract text from file.";
+
     return NextResponse.json(
       { error: errorMessage },
       { status: 500 }

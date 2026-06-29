@@ -25,7 +25,7 @@ export function normalize(text: string): string {
 export function splitWords(text: string): string[] {
   return text
     .split(/\s+/)
-    .map((w) => w.replace(/^[/-]+|[./-]+$/g, ""))
+    .map((w) => w.replace(/^[./-]+|[./-]+$/g, ""))
     .filter((w) => w.length > 0);
 }
 
