@@ -68,7 +68,7 @@ const FALLBACK_PRIORITY_NON_TECH: Record<
   Experience: "high",
   Education: "medium",
   Projects: "low",
-  Certifications: "low",
+  Certifications: "medium",
   Achievements: "medium",
   Leadership: "high",
   Volunteer: "medium",
@@ -116,7 +116,9 @@ const SECTION_PATTERNS: SectionPattern[] = [
   {
     section: "Summary",
     jdPatterns: [
-      /^\s*(summary|profile|professional summary|career objective)\s*:?$/im,
+      /^\s*(summary|brief summary|profile|profile summary|professional profile|professional summary|career summary|career objective|overview)\s*:?$/im,
+      /\bprofessional summary\b/i,
+      /\bcandidate profile\b/i,
     ],
   },
   {
@@ -124,6 +126,8 @@ const SECTION_PATTERNS: SectionPattern[] = [
     jdPatterns: [
       /\b(technical|tech)\s+skills?\b/i,
       /\brequired\s+skills?\b/i,
+      /\bpreferred\s+skills?\b/i,
+      /\bmust[-\s]?have\b/i,
       /\btechnologies?\b/i,
       /\btech\s+stack\b/i,
       /\bprogramming\b/i,
@@ -133,8 +137,11 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bskills?\b/i,
       /\bcore\s+skills?\b/i,
       /\bkey\s+skills?\b/i,
+      /\bkey expertise\b/i,
       /\bcompetencies\b/i,
       /\bfunctional\s+skills?\b/i,
+      /\brequirements?\b/i,
+      /\bqualifications?\b/i,
     ],
   },
   {
@@ -145,18 +152,22 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bwork\s+history\b/i,
       /\bprofessional\s+experience\b/i,
       /\bemployment\b/i,
+      /\bprior experience\b/i,
+      /\bindustry experience\b/i,
     ],
   },
   {
     section: "Education",
     jdPatterns: [
       /\beducation\b/i,
+      /\bacademic background\b/i,
       /\bdegree\b/i,
       /\bbachelor/i,
       /\bmaster/i,
       /\bphd\b/i,
       /\buniversity\b/i,
       /\bcollege\b/i,
+      /\bqualifications?\b/i,
     ],
   },
   {
@@ -167,11 +178,18 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bgithub\b/i,
       /\bcase\s+stud/i,
       /\bwork\s+samples?\b/i,
+      /\bproject experience\b/i,
     ],
   },
   {
     section: "Certifications",
-    jdPatterns: [/\bcertificat/i, /\baccreditat/i, /\blicens/i],
+    jdPatterns: [
+      /\bcertificat/i,
+      /\baccreditat/i,
+      /\blicens/i,
+      /\bcredential/i,
+      /\bcertified\b/i,
+    ],
   },
   {
     section: "Achievements",
@@ -181,6 +199,7 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bhonou?r/i,
       /\brecognition\b/i,
       /\baccomplishment/i,
+      /\bproven track record\b/i,
     ],
   },
   {
@@ -191,6 +210,9 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bled\b/i,
       /\bowner(ship)?\b/i,
       /\bmentorship\b/i,
+      /\bmentor(?:ed|ship)?\b/i,
+      /\bstakeholder management\b/i,
+      /\bteam management\b/i,
       /\bpositions?\s+of\s+responsibility\b/i,
     ],
   },
@@ -201,13 +223,16 @@ const SECTION_PATTERNS: SectionPattern[] = [
       /\bcommunity\b/i,
       /\bsocial\s+impact\b/i,
       /\bngo\b/i,
+      /\bnon[-\s]?profit\b/i,
+      /\bcommunity involvement\b/i,
     ],
   },
 ];
 
-const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
+const SECTION_ALIASES: Record<CanonicalSection, string[]> = {
   Summary: [
     "summary",
+    "brief summary",
     "profile summary",
     "professional summary",
     "career summary",
@@ -217,9 +242,11 @@ const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
     "about me",
     "overview",
   ],
+
   Skills: [
     "skills",
     "technical skills",
+    "required skills",
     "core skills",
     "key skills",
     "skills summary",
@@ -228,7 +255,9 @@ const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
     "tech stack",
     "tools and workflow",
     "programming languages",
+    "key expertise",
   ],
+
   Experience: [
     "experience",
     "work experience",
@@ -238,6 +267,9 @@ const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
     "internships",
     "relevant experience",
   ],
+
+  Education: ["education", "academic background", "qualifications"],
+
   Projects: [
     "projects",
     "project experience",
@@ -248,17 +280,7 @@ const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
     "projects / portfolio",
     "work samples",
   ],
-  Leadership: [
-    "leadership",
-    "leadership experience",
-    "positions of responsibility",
-    "position of responsibility",
-    "responsibility",
-    "responsibilities",
-    "extracurricular leadership",
-    "campus leadership",
-  ],
-  Education: ["education", "academic background", "qualifications"],
+
   Certifications: [
     "certifications",
     "certification",
@@ -266,7 +288,13 @@ const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
     "courses",
     "licenses",
     "accreditations",
+    "assessments / certifications",
+    "assessments and certifications",
+    "assessment / certification",
+    "assessment",
+    "assessments",
   ],
+
   Achievements: [
     "achievements",
     "achievement",
@@ -276,26 +304,56 @@ const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = {
     "accomplishments",
     "recognition",
   ],
+
+  Leadership: [
+    "leadership",
+    "leadership experience",
+    "positions of responsibility",
+    "position of responsibility",
+    "positions & responsibilities",
+    "responsibility",
+    "responsibilities",
+    "extracurricular leadership",
+    "campus leadership",
+  ],
+
   Volunteer: [
     "volunteer",
     "volunteering",
     "volunteer experience",
+    "volunteering experience",
     "community involvement",
     "community work",
     "social impact",
+    "extracurricular activities",
+    "extracurricular activities / volunteering",
+    "extracurricular / volunteering",
+    "extra-curricular activities",
+    "extra-curricular activities / volunteering",
+    "extra-curricular / volunteering",
+    "extracurricular",
+    "extra-curricular",
+    "community service",
   ],
 };
 
+const SECTION_SYNONYMS: Record<CanonicalSection, string[]> = SECTION_ALIASES;
+
+function buildHeadingPattern(aliases: string[]): RegExp {
+  const source = aliases.map(escapeRegExp).join("|");
+  return new RegExp(`^\\s*(${source})\\s*:?$`, "im");
+}
+
 const EXPLICIT_RESUME_SECTION_HEADING_PATTERNS: RegExp[] = [
-  /^\s*(summary|profile|professional summary|career objective)\s*:?$/im,
-  /^\s*(education|academic background)\s*:?$/im,
-  /^\s*(experience|work experience|professional experience)\s*:?$/im,
-  /^\s*(skills|technical skills|required skills|core skills|key skills|competencies)\s*:?$/im,
-  /^\s*(certifications|licenses|accreditations)\s*:?$/im,
-  /^\s*(projects|project experience|portfolio|work samples)\s*:?$/im,
-  /^\s*(leadership|leadership experience|positions? of responsibility)\s*:?$/im,
-  /^\s*(achievements|awards|honours?|recognition)\s*:?$/im,
-  /^\s*(volunteer|volunteer experience|community involvement)\s*:?$/im,
+  buildHeadingPattern(SECTION_ALIASES.Summary),
+  buildHeadingPattern(SECTION_ALIASES.Education),
+  buildHeadingPattern(SECTION_ALIASES.Experience),
+  buildHeadingPattern(SECTION_ALIASES.Skills),
+  buildHeadingPattern(SECTION_ALIASES.Certifications),
+  buildHeadingPattern(SECTION_ALIASES.Projects),
+  buildHeadingPattern(SECTION_ALIASES.Leadership),
+  buildHeadingPattern(SECTION_ALIASES.Achievements),
+  buildHeadingPattern(SECTION_ALIASES.Volunteer),
 ];
 
 function hasExplicitJdSectionSignals(jdText: string): boolean {
@@ -307,27 +365,15 @@ function hasExplicitJdSectionSignals(jdText: string): boolean {
 }
 
 const EXPLICIT_JD_TO_CHECKLIST_MAP: Record<CanonicalSection, RegExp[]> = {
-  Summary: [
-    /^\s*(summary|profile|professional summary|career objective)\s*:?$/im,
-  ],
-  Skills: [
-    /^\s*(skills|technical skills|required skills|core skills|key skills|competencies)\s*:?$/im,
-  ],
-  Experience: [
-    /^\s*(experience|work experience|professional experience)\s*:?$/im,
-  ],
-  Projects: [
-    /^\s*(projects|project experience|portfolio|work samples)\s*:?$/im,
-  ],
-  Leadership: [
-    /^\s*(leadership|leadership experience|positions? of responsibility)\s*:?$/im,
-  ],
-  Education: [/^\s*(education|academic background)\s*:?$/im],
-  Certifications: [/^\s*(certifications|licenses|accreditations)\s*:?$/im],
-  Achievements: [/^\s*(achievements|awards|honours?|recognition)\s*:?$/im],
-  Volunteer: [
-    /^\s*(volunteer|volunteer experience|community involvement)\s*:?$/im,
-  ],
+  Summary: [buildHeadingPattern(SECTION_ALIASES.Summary)],
+  Skills: [buildHeadingPattern(SECTION_ALIASES.Skills)],
+  Experience: [buildHeadingPattern(SECTION_ALIASES.Experience)],
+  Projects: [buildHeadingPattern(SECTION_ALIASES.Projects)],
+  Leadership: [buildHeadingPattern(SECTION_ALIASES.Leadership)],
+  Education: [buildHeadingPattern(SECTION_ALIASES.Education)],
+  Certifications: [buildHeadingPattern(SECTION_ALIASES.Certifications)],
+  Achievements: [buildHeadingPattern(SECTION_ALIASES.Achievements)],
+  Volunteer: [buildHeadingPattern(SECTION_ALIASES.Volunteer)],
 };
 
 function inferRoleType(jdText: string, resumeText: string): RoleType {
@@ -532,19 +578,41 @@ export function analyzeMatch(resumeText: string, jdText: string): MatchResult {
   const resumeLookup = tokenLookupSet(resumeTokens);
 
   // 3. Classify each JD token as covered or missing
-  const coveredTokens: Token[] = [];
-  const missingTokens: Token[] = [];
+  const coveredByConcept = new Map<string, Token>();
+  const missingByConcept = new Map<string, Token>();
+
+  let matchedCountRaw = 0;
+  let missedCountRaw = 0;
 
   for (const jdToken of jdTokens) {
-    if (resumeLookup.has(jdToken.normalized)) {
-      coveredTokens.push(jdToken);
+    const key = jdToken.conceptKey ?? jdToken.normalized;
+
+    if (resumeLookup.has(key)) {
+      matchedCountRaw++;
+
+      // Concept is present in the resume; keep the strongest representation
+      const existing = coveredByConcept.get(key);
+      if (!existing || jdToken.weight > existing.weight) {
+        coveredByConcept.set(key, jdToken);
+      }
     } else {
-      missingTokens.push(jdToken);
+      missedCountRaw++;
+
+      // Concept is missing; again keep the strongest JD token for display
+      const existing = missingByConcept.get(key);
+      if (!existing || jdToken.weight > existing.weight) {
+        missingByConcept.set(key, jdToken);
+      }
     }
   }
 
-  // 4. Compute weighted score
-  const maxWeightedScore = jdTokens.reduce((sum, t) => sum + t.weight, 0);
+  const coveredTokens: Token[] = Array.from(coveredByConcept.values());
+  const missingTokens: Token[] = Array.from(missingByConcept.values());
+
+  // 4. Compute weighted score (concept-level, as before)
+  const maxWeightedScore = coveredTokens
+    .concat(missingTokens)
+    .reduce((sum, t) => sum + t.weight, 0);
   const totalWeightedScore = coveredTokens.reduce(
     (sum, t) => sum + t.weight,
     0,
@@ -562,12 +630,12 @@ export function analyzeMatch(resumeText: string, jdText: string): MatchResult {
     detectedRoleType,
   } = detectSections(resumeText, jdText);
 
-  // 6. Stats and explanation
+  // 6. Stats and explanation (raw-token counts)
   const label = getScoreLabel(score);
   const stats: MatchStats = {
     totalJdTokens: jdTokens.length,
-    matchedCount: coveredTokens.length,
-    missedCount: missingTokens.length,
+    matchedCount: matchedCountRaw,
+    missedCount: missedCountRaw,
     totalWeightedScore,
     maxWeightedScore,
   };

@@ -4,6 +4,7 @@ import {
   splitWords,
   extractTokens,
   isStopword,
+  tokenLookupSet,
 } from "../lib/tokenizer";
 
 describe("Tokenizer", () => {
@@ -22,13 +23,13 @@ describe("Tokenizer", () => {
 
     it("removes punctuation", () => {
       expect(normalize("hello, world! How's it going?")).toBe(
-        "hello world how s it going"
+        "hello world how s it going",
       );
     });
 
     it("handles empty text safely", () => {
       expect(normalize("")).toBe("");
-      expect(normalize("   \n\t   ")).toBe("");
+      expect(normalize(" \n\t ")).toBe("");
     });
   });
 
@@ -66,7 +67,8 @@ describe("Tokenizer", () => {
 
   describe("extractTokens", () => {
     it("extracts dictionary tokens with higher priority", () => {
-      const text = "I have experience with React and Python, as well as Next.js.";
+      const text =
+        "I have experience with React and Python, as well as Next.js.";
       const tokens = extractTokens(text);
 
       const normalizedTokens = tokens.map((t) => t.normalized);
@@ -93,17 +95,46 @@ describe("Tokenizer", () => {
       expect(normalizedTokens).toContain("amazon web services");
     });
 
-    it("deduplicates tokens", () => {
-      const text = "React react React.js react";
+    it("deduplicates exact repeated tokens", () => {
+      const text = "React react react";
       const tokens = extractTokens(text);
 
       const reactCount = tokens.filter((t) => t.normalized === "react").length;
       expect(reactCount).toBe(1);
     });
 
+    it("assigns concept keys to synonym families", () => {
+      const text = "ReactJS with NodeJS and Amazon Web Services";
+      const tokens = extractTokens(text);
+
+      expect(tokens.find((t) => t.normalized === "reactjs")?.conceptKey).toBe(
+        "react.js",
+      );
+      expect(tokens.find((t) => t.normalized === "nodejs")?.conceptKey).toBe(
+        "node.js",
+      );
+      expect(
+        tokens.find((t) => t.normalized === "amazon web services")?.conceptKey,
+      ).toBe("aws");
+    });
+
     it("returns an empty array for empty or stopword-only text", () => {
       expect(extractTokens("")).toEqual([]);
       expect(extractTokens("the and with for")).toEqual([]);
+    });
+  });
+
+  describe("tokenLookupSet", () => {
+    it("includes both normalized tokens and concept keys", () => {
+      const tokens = extractTokens("ReactJS NodeJS Amazon Web Services");
+      const lookup = tokenLookupSet(tokens);
+
+      expect(lookup.has("reactjs")).toBe(true);
+      expect(lookup.has("react.js")).toBe(true);
+      expect(lookup.has("nodejs")).toBe(true);
+      expect(lookup.has("node.js")).toBe(true);
+      expect(lookup.has("amazon web services")).toBe(true);
+      expect(lookup.has("aws")).toBe(true);
     });
   });
 });

@@ -35,17 +35,36 @@ describe("Matcher", () => {
 
     const result = analyzeMatch(resume, jd);
 
-    const covered = result.coveredTokens.map((t) => t.normalized);
-    const missing = result.missingTokens.map((t) => t.normalized);
+    const covered = result.coveredTokens.map(
+      (t) => t.conceptKey ?? t.normalized,
+    );
+    const missing = result.missingTokens.map(
+      (t) => t.conceptKey ?? t.normalized,
+    );
 
-    expect(covered).toContain("react");
+    expect(covered).toContain("react.js");
     expect(covered).toContain("node.js");
     expect(covered).not.toContain("typescript");
     expect(covered).not.toContain("docker");
 
     expect(missing).toContain("typescript");
     expect(missing).toContain("docker");
-    expect(missing).not.toContain("react");
+    expect(missing).not.toContain("react.js");
+  });
+
+  it("deduplicates synonym variants into one covered concept", () => {
+    const jd = "Need React, ReactJS, and React.js experience.";
+    const resume = "Built production apps with React.";
+
+    const result = analyzeMatch(resume, jd);
+    const reactCovered = result.coveredTokens.filter(
+      (t) => (t.conceptKey ?? t.normalized) === "react.js",
+    );
+
+    expect(reactCovered).toHaveLength(1);
+    expect(result.missingTokens).toHaveLength(0);
+    expect(result.stats.matchedCount).toBe(3);
+    expect(result.coveredTokens.length).toBeLessThan(result.stats.matchedCount);
   });
 
   it("uses tech fallback checklist when JD does not specify explicit resume headings", () => {
@@ -128,65 +147,74 @@ Projects: Resume matcher
     expect(projects?.found).toBe(true);
   });
 
-  it("builds stable stats and explanation", () => {
-    const jd = "React TypeScript Node.js Docker AWS";
-    const resume = "React TypeScript Node.js";
+  it("keeps raw stats separate from concept-level token display", () => {
+    const jd = "React ReactJS React.js Docker Docker Compose AWS";
+    const resume = "React AWS";
 
     const result = analyzeMatch(resume, jd);
 
     expect(result.stats.totalJdTokens).toBeGreaterThan(0);
-    expect(result.stats.matchedCount).toBe(result.coveredTokens.length);
-    expect(result.stats.missedCount).toBe(result.missingTokens.length);
+    expect(result.stats.matchedCount).toBe(4);
+    expect(result.stats.missedCount).toBe(2);
+    expect(result.coveredTokens.length).toBe(2);
+    expect(result.missingTokens.length).toBe(1);
+    expect(result.stats.matchedCount).toBeGreaterThan(
+      result.coveredTokens.length,
+    );
+    expect(result.stats.missedCount).toBeGreaterThan(
+      result.missingTokens.length,
+    );
     expect(result.explanation).toContain("We extracted");
     expect(result.explanation).toContain("Your weighted score:");
     expect(result.explanation).toContain("Overall assessment:");
   });
-});
 
-it("maps Profile Summary to Summary", () => {
-  const jd = "Summary and education are required.";
-  const resume =
-    "Profile Summary:\nFrontend developer\nEducation:\nB.E. in CSE";
+  it("maps Profile Summary to Summary", () => {
+    const jd = "Summary and education are required.";
+    const resume =
+      "Profile Summary:\nFrontend developer\nEducation:\nB.E. in CSE";
 
-  const result = analyzeMatch(resume, jd);
+    const result = analyzeMatch(resume, jd);
 
-  expect(
-    result.sectionChecklist.find((s) => s.section === "Summary")?.found,
-  ).toBe(true);
-  expect(
-    result.sectionChecklist.find((s) => s.section === "Education")?.found,
-  ).toBe(true);
-});
+    expect(
+      result.sectionChecklist.find((s) => s.section === "Summary")?.found,
+    ).toBe(true);
+    expect(
+      result.sectionChecklist.find((s) => s.section === "Education")?.found,
+    ).toBe(true);
+  });
 
-it("maps Technical Skills to Skills", () => {
-  const jd = "Technical skills are required.";
-  const resume = "Technical Skills:\nReact, TypeScript, Next.js";
+  it("maps Technical Skills to Skills", () => {
+    const jd = "Technical skills are required.";
+    const resume = "Technical Skills:\nReact, TypeScript, Next.js";
 
-  const result = analyzeMatch(resume, jd);
+    const result = analyzeMatch(resume, jd);
 
-  expect(
-    result.sectionChecklist.find((s) => s.section === "Skills")?.found,
-  ).toBe(true);
-});
+    expect(
+      result.sectionChecklist.find((s) => s.section === "Skills")?.found,
+    ).toBe(true);
+  });
 
-it("maps Position of Responsibility to Leadership", () => {
-  const jd = "Leadership experience is preferred.";
-  const resume = "Position of Responsibility:\nIEEE Chairperson";
+  it("maps Position of Responsibility to Leadership", () => {
+    const jd = "Leadership experience is preferred.";
+    const resume = "Position of Responsibility:\nIEEE Chairperson";
 
-  const result = analyzeMatch(resume, jd);
+    const result = analyzeMatch(resume, jd);
 
-  expect(
-    result.sectionChecklist.find((s) => s.section === "Leadership")?.found,
-  ).toBe(true);
-});
+    expect(
+      result.sectionChecklist.find((s) => s.section === "Leadership")?.found,
+    ).toBe(true);
+  });
 
-it("does not treat body text as an Experience heading", () => {
-  const jd = "Experience is required.";
-  const resume = "Built several projects with experience in React and Node.js.";
+  it("does not treat body text as an Experience heading", () => {
+    const jd = "Experience is required.";
+    const resume =
+      "Built several projects with experience in React and Node.js.";
 
-  const result = analyzeMatch(resume, jd);
+    const result = analyzeMatch(resume, jd);
 
-  expect(
-    result.sectionChecklist.find((s) => s.section === "Experience")?.found,
-  ).toBe(false);
+    expect(
+      result.sectionChecklist.find((s) => s.section === "Experience")?.found,
+    ).toBe(false);
+  });
 });
