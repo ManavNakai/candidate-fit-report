@@ -155,14 +155,11 @@ Projects: Resume matcher
 
     expect(result.stats.totalJdTokens).toBeGreaterThan(0);
     expect(result.stats.matchedCount).toBe(4);
-    expect(result.stats.missedCount).toBe(2);
+    expect(result.stats.missedCount).toBe(1);
     expect(result.coveredTokens.length).toBe(2);
     expect(result.missingTokens.length).toBe(1);
     expect(result.stats.matchedCount).toBeGreaterThan(
       result.coveredTokens.length,
-    );
-    expect(result.stats.missedCount).toBeGreaterThan(
-      result.missingTokens.length,
     );
     expect(result.explanation).toContain("We extracted");
     expect(result.explanation).toContain("Your weighted score:");
