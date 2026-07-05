@@ -3,8 +3,12 @@
 // ============================================================
 
 import { STOPWORDS } from "./stopwords";
-import { SKILL_WEIGHTS } from "./skillWeights";
+import { SKILL_WEIGHTS, SKILL_CONCEPT_KEYS } from "./skillWeights";
 import type { Token } from "./types";
+
+function getConceptKey(normalized: string): string {
+  return SKILL_CONCEPT_KEYS[normalized] ?? normalized;
+}
 
 /**
  * Normalize a string: lowercase, strip non-alphanumeric (keeping +, #, ., /),
@@ -13,9 +17,9 @@ import type { Token } from "./types";
 export function normalize(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[\r\n\t]+/g, " ")               // newlines → space
-    .replace(/[^a-z0-9+#./ -]/g, " ")         // keep +#./ for C++, C#, .NET, CI/CD
-    .replace(/\s+/g, " ")                     // collapse whitespace
+    .replace(/[\r\n\t]+/g, " ") // newlines → space
+    .replace(/[^a-z0-9+#./ -]/g, " ") // keep +#./ for C++, C#, .NET, CI/CD
+    .replace(/\s+/g, " ") // collapse whitespace
     .trim();
 }
 
@@ -25,7 +29,7 @@ export function normalize(text: string): string {
 export function splitWords(text: string): string[] {
   return text
     .split(/\s+/)
-    .map((w) => w.replace(/^[/-]+|[./-]+$/g, ""))
+    .map((w) => w.replace(/^[./-]+|[./-]+$/g, ""))
     .filter((w) => w.length > 0);
 }
 
@@ -88,6 +92,7 @@ export function extractTokens(rawText: string): Token[] {
         normalized: trigram,
         category: skill.category,
         weight: skill.weight,
+        conceptKey: getConceptKey(trigram),
       });
       consumed.add(i);
       consumed.add(i + 1);
@@ -106,6 +111,7 @@ export function extractTokens(rawText: string): Token[] {
         normalized: bigram,
         category: skill.category,
         weight: skill.weight,
+        conceptKey: getConceptKey(bigram),
       });
       consumed.add(i);
       consumed.add(i + 1);
@@ -128,6 +134,7 @@ export function extractTokens(rawText: string): Token[] {
         normalized: word,
         category: skill.category,
         weight: skill.weight,
+        conceptKey: getConceptKey(word),
       });
     }
   }
@@ -139,5 +146,15 @@ export function extractTokens(rawText: string): Token[] {
  * Create a lookup Set of normalized token strings for fast membership checks.
  */
 export function tokenLookupSet(tokens: Token[]): Set<string> {
-  return new Set(tokens.map((t) => t.normalized));
+  const set = new Set<string>();
+
+  for (const t of tokens) {
+    set.add(t.normalized);
+
+    if (t.conceptKey && t.conceptKey !== t.normalized) {
+      set.add(t.conceptKey);
+    }
+  }
+
+  return set;
 }

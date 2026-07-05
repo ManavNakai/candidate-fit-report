@@ -67,7 +67,7 @@ export default function Footer() {
           </div>
 
           <div className="border-t border-slate-800/80 px-6 py-4 md:px-8">
-            <p className="text-center text-xs text-slate-600 md:text-left">
+            <p className="text-center text-xs text-slate-600 md:text-right">
               © {new Date().getFullYear()} Candidate Fit Report. 100% free & client-side.
             </p>
           </div>

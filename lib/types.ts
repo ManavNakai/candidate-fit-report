@@ -12,9 +12,12 @@ export interface Token {
   category: TokenCategory;
   /** Numeric weight used in scoring (higher = more important). */
   weight: number;
+  /** Canonical concept key used to group synonyms (e.g. "node.js" for "node"/"nodejs"). */
+  conceptKey?: string;
 }
 
 export type TokenCategory =
+  | "concept"
   | "programming_language"
   | "framework"
   | "tool"
@@ -37,7 +40,7 @@ export type TokenCategory =
 /** A resume-section check (e.g. "Does the resume cover Education?"). */
 export interface SectionCheck {
   /** Human-readable section name. */
-  section: string;
+  section: CanonicalSection;
   /** Whether a match was found in the resume. */
   found: boolean;
   /** How strongly the JD emphasises this section. */
@@ -73,3 +76,14 @@ export interface MatchStats {
   totalWeightedScore: number;
   maxWeightedScore: number;
 }
+
+export type CanonicalSection =
+  | "Summary"
+  | "Skills"
+  | "Experience"
+  | "Projects"
+  | "Leadership"
+  | "Education"
+  | "Certifications"
+  | "Achievements"
+  | "Volunteer";
